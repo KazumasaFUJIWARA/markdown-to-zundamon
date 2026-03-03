@@ -17,8 +17,8 @@ export const ChapterTitle: React.FC<Props> = ({
     <div
       style={{
         position: "absolute",
-        top: 32,
-        ...(isRight ? { right: 40 } : { left: 40 }),
+        top: 40,
+        ...(isRight ? { right: 60 } : { left: 60 }),
         padding: "12px 28px",
         backgroundColor: "rgba(0, 0, 0, 0.45)",
         borderRadius: 12,

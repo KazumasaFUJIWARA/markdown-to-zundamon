@@ -338,6 +338,16 @@ async function main() {
       if (!title) continue;
       const depth = (node as { depth: number }).depth;
       console.log(`[chapter] ${"#".repeat(depth)} ${title}`);
+      // Add transition pause before chapter (except for the first segment or consecutive chapters)
+      const slideTransitionFrames = Math.ceil((config.slideTransitionMs / 1000) * config.fps);
+      const lastSeg = segments[segments.length - 1];
+      if (segments.length > 0 && slideTransitionFrames > 0 && lastSeg?.type !== "chapter") {
+        segments.push({
+          type: "pause",
+          text: "",
+          durationInFrames: slideTransitionFrames,
+        });
+      }
       segments.push({
         type: "chapter",
         text: title,
@@ -349,9 +359,11 @@ async function main() {
       const text = toString(node);
       const markdown = await blockquoteToMarkdown(node, mdDir, imagesDir, projectName);
       console.log(`[slide] ${text.slice(0, 40)}...`);
-      // Add transition pause before slide (except for the first segment)
+      // Add transition pause before slide, but skip if preceded by a chapter
+      // (the pause was already inserted before the chapter)
       const slideTransitionFrames = Math.ceil((config.slideTransitionMs / 1000) * config.fps);
-      if (segments.length > 0 && slideTransitionFrames > 0) {
+      const lastSeg = segments[segments.length - 1];
+      if (segments.length > 0 && slideTransitionFrames > 0 && lastSeg?.type !== "chapter") {
         segments.push({
           type: "pause",
           text: "",
