@@ -23,6 +23,8 @@ characters:
     height: 800
 ---
 
+# イントロ
+
 > # markdown-to-zundamon
 
 [ずんだもん] こんにちは！ ずんだもんなのだ。
@@ -34,6 +36,8 @@ characters:
 [ずんだもん] 世はまさに動画時代！
 [四国めたん] 文章なら書けるってキミも、動画を作るのは一苦労よね？
 
+## ツールの紹介
+
 > ## markdown-to-zundamon とは
 >
 > Markdownを書くだけで、ずんだもんが解説してくれる動画を自動生成！
@@ -41,6 +45,8 @@ characters:
 [ずんだもん] そこで markdown-to-zundamon なのだ！
 [pause: 500ms]
 [四国めたん] これさえあれば、Markdownファイルからずんだもん動画を生成できるのよ！
+
+## デモ
 
 > ```markdown
 > > - 動画づくりって大変

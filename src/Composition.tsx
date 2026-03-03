@@ -11,6 +11,7 @@ import {
 import { getAvailableFonts } from "@remotion/google-fonts";
 import { CompositionPropsSchema } from "./types";
 import { CharacterDisplay } from "./components/CharacterDisplay";
+import { ChapterTitle } from "./components/ChapterTitle";
 import { Subtitle } from "./components/Subtitle";
 import { SlideContent } from "./components/SlideContent";
 
@@ -106,6 +107,14 @@ export const ZundamonComposition: React.FC<Record<string, unknown>> = (props) =>
     }
   }
 
+  // Find current chapter: last chapter segment whose startFrame <= current frame
+  let currentChapterTitle: string | null = null;
+  for (const entry of timeline) {
+    if (entry.segment.type === "chapter" && entry.startFrame <= frame) {
+      currentChapterTitle = entry.segment.text;
+    }
+  }
+
   // Find current speech segment for subtitle and active character
   let currentSpeechText: string | null = null;
   let currentSpeechCharacter: string | null = null;
@@ -188,6 +197,15 @@ export const ZundamonComposition: React.FC<Record<string, unknown>> = (props) =>
           markdown={currentSlideMarkdown}
           fontFamily={slideFontFamily}
           codeHighlightTheme={config.codeHighlightTheme}
+        />
+      )}
+
+      {/* Chapter title */}
+      {currentChapterTitle && (
+        <ChapterTitle
+          title={currentChapterTitle}
+          fontFamily={baseFontFamily}
+          position={config.chapterTitlePosition}
         />
       )}
 

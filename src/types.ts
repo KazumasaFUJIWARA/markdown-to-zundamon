@@ -35,15 +35,19 @@ export const ManifestConfigSchema = z.object({
   slideFontFamily: z.string().optional(),
   codeHighlightTheme: z.string().default("oneLight"),
   bgm: BgmConfigSchema.optional(),
+  chapterTitlePosition: z
+    .enum(["top-right", "top-left"])
+    .default("top-right"),
 });
 
 export const SegmentSchema = z.object({
-  type: z.enum(["speech", "slide", "pause"]),
+  type: z.enum(["speech", "slide", "pause", "chapter"]),
   text: z.string(),
   audioFile: z.string().optional(),
   durationInFrames: z.number(),
   markdown: z.string().optional(),
   character: z.string().optional(),
+  chapterLevel: z.number().optional(),
 });
 
 export const ManifestSchema = z.object({

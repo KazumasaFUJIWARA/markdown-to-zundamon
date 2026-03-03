@@ -333,7 +333,19 @@ async function main() {
   let prevNodeHadSpeech = false;
 
   for (const node of tree.children) {
-    if (node.type === "blockquote") {
+    if (node.type === "heading") {
+      const title = toString(node).trim();
+      if (!title) continue;
+      const depth = (node as { depth: number }).depth;
+      console.log(`[chapter] ${"#".repeat(depth)} ${title}`);
+      segments.push({
+        type: "chapter",
+        text: title,
+        durationInFrames: 0,
+        chapterLevel: depth,
+      });
+      prevNodeHadSpeech = false;
+    } else if (node.type === "blockquote") {
       const text = toString(node);
       const markdown = await blockquoteToMarkdown(node, mdDir, imagesDir, projectName);
       console.log(`[slide] ${text.slice(0, 40)}...`);
@@ -509,6 +521,31 @@ async function main() {
   console.log(
     `Total duration: ${totalDurationInFrames} frames (${(totalDurationInFrames / config.fps).toFixed(1)}s)`
   );
+
+  // Output chapter timestamps
+  const chapters: { title: string; frame: number }[] = [];
+  let framePos = 0;
+  for (const seg of segments) {
+    if (seg.type === "chapter") {
+      chapters.push({ title: seg.text, frame: framePos });
+    }
+    framePos += seg.durationInFrames;
+  }
+  if (chapters.length > 0) {
+    console.log(`\nChapters:`);
+    const lines: string[] = [];
+    for (const ch of chapters) {
+      const totalSec = ch.frame / config.fps;
+      const min = Math.floor(totalSec / 60);
+      const sec = Math.floor(totalSec % 60);
+      const ts = `${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+      console.log(`  ${ts} ${ch.title}`);
+      lines.push(`${ts} ${ch.title}`);
+    }
+    const chaptersPath = path.join(projectDir, "chapters.txt");
+    fs.writeFileSync(chaptersPath, lines.join("\n") + "\n");
+    console.log(`Chapters written to ${chaptersPath}`);
+  }
 
   console.log(`\nNext steps:`);
   console.log(`  Preview: npm run studio -- ${projectName}`);
