@@ -2,5 +2,3 @@ node_modules/
 dist/
 out/
 public/
-characters/*
-!characters/README.md
