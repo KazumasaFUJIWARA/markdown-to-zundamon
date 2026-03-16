@@ -48,6 +48,15 @@ export const SlideContent: React.FC<Props> = ({ markdown, fontFamily, codeHighli
         <Markdown
           remarkPlugins={[remarkGfm]}
           components={{
+            ul: ({ children }) => (
+              <ul style={{ paddingLeft: "1.5em", margin: "0 0 16px" }}>{children}</ul>
+            ),
+            ol: ({ children }) => (
+              <ol style={{ paddingLeft: "1.5em", margin: "0 0 16px" }}>{children}</ol>
+            ),
+            li: ({ children }) => (
+              <li style={{ marginBottom: 8 }}>{children}</li>
+            ),
             h1: ({ children }) => (
               <div
                 style={{
@@ -92,18 +101,6 @@ export const SlideContent: React.FC<Props> = ({ markdown, fontFamily, codeHighli
                 }}
               >
                 {children}
-              </div>
-            ),
-            ul: ({ children }) => (
-              <div style={{ paddingLeft: 40 }}>{children}</div>
-            ),
-            ol: ({ children }) => (
-              <div style={{ paddingLeft: 40 }}>{children}</div>
-            ),
-            li: ({ children }) => (
-              <div style={{ marginBottom: 12, display: "flex", gap: 16 }}>
-                <span>•</span>
-                <span>{children}</span>
               </div>
             ),
             strong: ({ children }) => (
