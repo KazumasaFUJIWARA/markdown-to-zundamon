@@ -7,10 +7,12 @@ Markdownからずんだもん解説動画を生成するプロジェクト。Rem
 - Node.js
 - VOICEVOX が `localhost:50021` で起動していること（前処理時）
 
+任意: `ZUNDAMON_PUBLIC_DIR` で `public` 相当のディレクトリを指定、`ZUNDAMON_OUTPUT` でレンダ結果の MP4 パスまたは出力ディレクトリを指定（`README.md` 参照）。
+
 ## ビルド・実行手順
 
 ```bash
-# 1. 前処理: Markdown解析 + VOICEVOX音声生成 → public/<project>/manifest.json
+# 1. 前処理: Markdown解析 + VOICEVOX音声生成 → public/projects/<project>/manifest.json
 npm run preprocess -- example/my-video.md
 
 # 2. プレビュー
@@ -49,10 +51,10 @@ npm run render -- chapter1
 - `src/Composition.tsx` - メイン合成コンポーネント
 - `src/components/` - UI コンポーネント群
 - `src/types.ts` - 型定義
-- `public/<project>/manifest.json` - 前処理出力（生成物）
-- `public/<project>/audio/` - 生成された音声ファイル（生成物）
-- `public/<project>/images/` - スライド用画像（生成物）
-- `public/characters/default.png` - ずんだもんキャラ画像（共有、生成物）
+- `public/projects/<project>/manifest.json` - 前処理出力（生成物）
+- `public/projects/<project>/audio/` - 生成された音声ファイル（生成物）
+- `public/projects/<project>/images/` - スライド用画像（生成物）
+- `public/characters/<キャラ名>/default.png` ほか - 前処理でコピーされた立ち絵（生成物）
 - `characters/` - キャラクター画像（ソース）
 - `out/<project>.mp4` - レンダリング出力（生成物）
 

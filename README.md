@@ -85,11 +85,24 @@ npm run render -- my-talk       # out/my-talk.mp4
 | 変数名 | デフォルト値 | 説明 |
 |--------|-------------|------|
 | `VOICEVOX_BASE` | `http://localhost:50021` | VOICEVOX API のベース URL |
+| `ZUNDAMON_PUBLIC_DIR` | （リポジトリの）`public` | 静的アセットのルート。`projects/` と `characters/` はこの直下に置かれる。相対指定はリポジトリルート基準。**前処理・Remotion（studio/render）で同じ値に揃える。** |
+| `ZUNDAMON_OUTPUT` | `out/<プロジェクト名>.mp4` | レンダ結果の出力先。**`.mp4` で終わる場合**はそのファイルパス、**それ以外はディレクトリ**として解釈し、その中に `<プロジェクト名>.mp4` を書き出す。相対指定はリポジトリルート基準。 |
 
 例: リモートの VOICEVOX サーバーを使う場合:
 
 ```bash
 VOICEVOX_BASE=http://192.168.1.100:50021 npm run preprocess -- slides/my-talk.md
+```
+
+例: 別ドライブに中間生成物と MP4 をまとめる（PowerShell / bash いずれも同様に環境変数を渡す）:
+
+```bash
+# 前処理・プレビュー・レンダで同じ ZUNDAMON_PUBLIC_DIR を使う
+export ZUNDAMON_PUBLIC_DIR=/media/ssd/zundamon-public
+export ZUNDAMON_OUTPUT=/media/ssd/videos
+npm run preprocess -- slides/my-talk.md
+npm run render -- my-talk
+# → /media/ssd/videos/my-talk.mp4
 ```
 
 ## Frontmatter 設定

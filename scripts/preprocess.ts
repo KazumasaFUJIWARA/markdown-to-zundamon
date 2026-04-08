@@ -12,7 +12,15 @@ import { ManifestConfigSchema } from "../src/types";
 
 const VOICEVOX_BASE = process.env.VOICEVOX_BASE ?? "http://localhost:50021";
 
-const BASE_PUBLIC_DIR = path.resolve(__dirname, "../public/projects");
+const REPO_ROOT = path.resolve(__dirname, "..");
+
+function resolvePublicRoot(): string {
+  const raw = process.env.ZUNDAMON_PUBLIC_DIR;
+  if (raw === undefined || raw === "") {
+    return path.join(REPO_ROOT, "public");
+  }
+  return path.isAbsolute(raw) ? raw : path.resolve(REPO_ROOT, raw);
+}
 
 function sanitizeForFilename(text: string): string {
   return text
@@ -251,12 +259,14 @@ function buildCharacterMap(
 }
 
 /** Copy character images to public directory */
-function copyCharacterImages(characters: Character[]): void {
+function copyCharacterImages(characters: Character[], publicRoot: string): void {
   for (const char of characters) {
     const charSrc = path.resolve(__dirname, `../characters/${char.name}/default.png`);
-    const charDst = path.resolve(
-      __dirname,
-      `../public/characters/${char.name}/default.png`
+    const charDst = path.join(
+      publicRoot,
+      "characters",
+      char.name,
+      "default.png"
     );
     if (fs.existsSync(charSrc)) {
       fs.mkdirSync(path.dirname(charDst), { recursive: true });
@@ -275,9 +285,11 @@ function copyCharacterImages(characters: Character[]): void {
       char.activeImages = [];
       for (const file of activeFiles) {
         const activeSrc = path.join(charDir, file);
-        const activeDst = path.resolve(
-          __dirname,
-          `../public/characters/${char.name}/${file}`
+        const activeDst = path.join(
+          publicRoot,
+          "characters",
+          char.name,
+          file
         );
         fs.copyFileSync(activeSrc, activeDst);
         char.activeImages.push(file);
@@ -297,13 +309,16 @@ async function main() {
   const resolvedMdPath = path.resolve(mdPath);
   const mdDir = path.dirname(resolvedMdPath);
 
+  const publicRoot = resolvePublicRoot();
+  const BASE_PUBLIC_DIR = path.join(publicRoot, "projects");
+
   // Derive project name from input filename (without extension)
   const projectName = path.basename(resolvedMdPath, path.extname(resolvedMdPath));
   const projectDir = path.join(BASE_PUBLIC_DIR, projectName);
   const audioDir = path.join(projectDir, "audio");
   const imagesDir = path.join(projectDir, "images");
 
-  console.log(`Project: "${projectName}" → public/projects/${projectName}/`);
+  console.log(`Project: "${projectName}" → ${path.relative(REPO_ROOT, projectDir) || projectDir}/`);
 
   const raw = fs.readFileSync(resolvedMdPath, "utf-8");
   const { data: frontmatter, content: mdContent } = matter(raw);
@@ -488,7 +503,7 @@ async function main() {
   }
 
   // Copy character images (before manifest write so activeImages is populated)
-  copyCharacterImages(config.characters);
+  copyCharacterImages(config.characters, publicRoot);
 
   // Copy BGM file if configured
   let bgmFile: string | undefined;

@@ -4,12 +4,14 @@ characters:
     speakerId: 3
     position: right
     color: "#55B02E"
-    bottomOffset: 20
+    bottomOffset: 60
     height: 260
+    overflowY: 0.05
   - name: ろんちゃん
     speakerId: 2
     flip: true
     color: "#b4456e"
+    overflowY: 0.1
     overflowX: 0.1
     bottomOffset: 80
     height: 260
