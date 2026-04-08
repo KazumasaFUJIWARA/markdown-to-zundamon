@@ -18,15 +18,20 @@ export const RemotionRoot: React.FC = () => {
       }}
       calculateMetadata={async (options) => {
         const props = CompositionPropsSchema.parse(options.props);
-        const url = staticFile(`projects/${props.projectName}/manifest.json`);
-        const res = await fetch(url);
-        if (!res.ok) {
-          throw new Error(
-            `Failed to load manifest for project "${props.projectName}" (${res.status}). ` +
-            `Run: npm run preprocess -- <your-markdown-file.md>`
-          );
+        let manifest;
+        if (props.manifest !== undefined) {
+          manifest = ManifestSchema.parse(props.manifest);
+        } else {
+          const url = staticFile(`projects/${props.projectName}/manifest.json`);
+          const res = await fetch(url);
+          if (!res.ok) {
+            throw new Error(
+              `Failed to load manifest for project "${props.projectName}" (${res.status}). ` +
+                `Run: npm run preprocess -- <your-markdown-file.md>`
+            );
+          }
+          manifest = ManifestSchema.parse(await res.json());
         }
-        const manifest = ManifestSchema.parse(await res.json());
         return {
           durationInFrames: manifest.totalDurationInFrames,
           fps: manifest.config.fps,

@@ -210,13 +210,15 @@ export const ZundamonComposition: React.FC<Record<string, unknown>> = (props) =>
       )}
 
       {/* Characters */}
-      {config.characters.map((char) => (
+      {config.characters.map((char) => {
+        const cdir = char.assetDir ?? char.name;
+        return (
         <CharacterDisplay
           key={char.name}
           isSpeaking={currentSpeechCharacter === char.name}
-          imageSrc={`characters/${char.name}/default.png`}
+          imageSrc={`characters/${cdir}/default.png`}
           activeImageSrcs={char.activeImages?.map(
-            (img) => `characters/${char.name}/${img}`
+            (img) => `characters/${cdir}/${img}`
           )}
           position={char.position}
           flip={char.flip}
@@ -224,7 +226,8 @@ export const ZundamonComposition: React.FC<Record<string, unknown>> = (props) =>
           overflowSide={char.overflowX}
           height={char.height}
         />
-      ))}
+        );
+      })}
 
       {/* Subtitle */}
       {currentSpeechText && (

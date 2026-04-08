@@ -28,10 +28,24 @@ function resolveRenderOutput(projectName: string): string {
   return path.join(resolved, `${projectName}.mp4`);
 }
 
+/** 第3引数で .mp4 を渡した場合は最優先（ソース横など任意パスへ出力） */
+function resolveFinalOutput(projectName: string): string {
+  const cliArg = process.argv[3];
+  if (cliArg !== undefined && cliArg.toLowerCase().endsWith(".mp4")) {
+    const out = path.isAbsolute(cliArg) ? cliArg : path.resolve(REPO_ROOT, cliArg);
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    return out;
+  }
+  return resolveRenderOutput(projectName);
+}
+
 const projectName = process.argv[2];
 if (!projectName) {
-  console.error("Usage: npm run render -- <project-name>");
+  console.error("Usage: npm run render -- <project-name> [output.mp4]");
   console.error("Example: npm run render -- example");
+  console.error(
+    "Example (next to script): npm run render -- calculus-2026 /path/to/calculus-2026.mp4"
+  );
   process.exit(1);
 }
 
@@ -48,8 +62,12 @@ if (!fs.existsSync(manifestPath)) {
   process.exit(1);
 }
 
-const outFile = resolveRenderOutput(projectName);
-const props = JSON.stringify({ projectName });
+const outFile = resolveFinalOutput(projectName);
+const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+const propsObj = { projectName, manifest };
+const propsFile = path.join(REPO_ROOT, "out", `.render-props-${projectName}.json`);
+fs.mkdirSync(path.dirname(propsFile), { recursive: true });
+fs.writeFileSync(propsFile, JSON.stringify(propsObj), "utf8");
 
 console.log(`Rendering "${projectName}" → ${outFile}`);
 
@@ -57,9 +75,12 @@ const outArg = path.isAbsolute(outFile)
   ? outFile
   : path.relative(REPO_ROOT, outFile) || ".";
 
+// --props=ファイル で渡す（CLI の JSON エスケープ問題と fetch/staticFile 404 を回避）
+const propsArg = `--props=${propsFile.replace(/\\/g, "/")}`;
+
 const result = spawnSync(
   "npx",
-  ["remotion", "render", "ZundamonVideo", "--props", props, outArg],
+  ["remotion", "render", "ZundamonVideo", propsArg, outArg],
   {
     stdio: "inherit",
     cwd: REPO_ROOT,

@@ -31,7 +31,9 @@ function sanitizeForFilename(text: string): string {
 }
 
 function shortHash(text: string): string {
-  return crypto.createHash("sha256").update(text).digest("hex").slice(0, 8);
+  // Remotion の public コピーと OS 差で、本文由来のファイル名が 404 になりやすい。
+  // 衝突耐性のため 16 hex（64bit）にし、拡張子は .wav のみとする。
+  return crypto.createHash("sha256").update(text).digest("hex").slice(0, 16);
 }
 
 /** Parse WAV header to get duration in seconds */
@@ -57,8 +59,7 @@ async function synthesize(
   projectName: string
 ): Promise<{ audioPath: string; durationSec: number }> {
   const hash = shortHash(text);
-  const sanitized = sanitizeForFilename(text);
-  const filename = `${hash}-${sanitized}.wav`;
+  const filename = `${hash}.wav`;
   const audioPath = path.join(audioDir, filename);
 
   if (fs.existsSync(audioPath)) {
@@ -258,26 +259,32 @@ function buildCharacterMap(
   return map;
 }
 
+/** ASCII のみのディレクトリ名（Remotion が public を /tmp にコピーする際のパス問題回避） */
+function characterPublicDir(charName: string): string {
+  return crypto.createHash("sha256").update(`char:${charName}`).digest("hex").slice(0, 16);
+}
+
 /** Copy character images to public directory */
 function copyCharacterImages(characters: Character[], publicRoot: string): void {
   for (const char of characters) {
+    const pubDir = characterPublicDir(char.name);
+    char.assetDir = pubDir;
+
     const charSrc = path.resolve(__dirname, `../characters/${char.name}/default.png`);
-    const charDst = path.join(
-      publicRoot,
-      "characters",
-      char.name,
-      "default.png"
-    );
+    const charDst = path.join(publicRoot, "characters", pubDir, "default.png");
     if (fs.existsSync(charSrc)) {
       fs.mkdirSync(path.dirname(charDst), { recursive: true });
       fs.copyFileSync(charSrc, charDst);
-      console.log(`  [char] ${char.name} → characters/${char.name}/default.png`);
+      console.log(`  [char] ${char.name} → characters/${pubDir}/default.png`);
     } else {
       console.warn(`  [warn] Character image not found: ${charSrc}`);
     }
 
     // Copy active images for lip-sync animation (default_active1.png, default_active2.png, ...)
     const charDir = path.resolve(__dirname, `../characters/${char.name}`);
+    if (!fs.existsSync(charDir)) {
+      continue;
+    }
     const activeFiles = fs.readdirSync(charDir)
       .filter((f) => /^default_active\d+\.png$/.test(f))
       .sort();
@@ -285,15 +292,10 @@ function copyCharacterImages(characters: Character[], publicRoot: string): void 
       char.activeImages = [];
       for (const file of activeFiles) {
         const activeSrc = path.join(charDir, file);
-        const activeDst = path.join(
-          publicRoot,
-          "characters",
-          char.name,
-          file
-        );
+        const activeDst = path.join(publicRoot, "characters", pubDir, file);
         fs.copyFileSync(activeSrc, activeDst);
         char.activeImages.push(file);
-        console.log(`  [char] ${char.name} → characters/${char.name}/${file}`);
+        console.log(`  [char] ${char.name} → characters/${pubDir}/${file}`);
       }
     }
   }

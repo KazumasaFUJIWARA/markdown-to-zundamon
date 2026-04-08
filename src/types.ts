@@ -10,7 +10,9 @@ export const CharacterSchema = z.object({
   overflowY: z.number().default(0.4),
   overflowX: z.number().default(0.1),
   height: z.number().default(800),
-  // image path は name から自動解決: characters/<name>/default.png
+  // preprocess が立ち絵を ASCII 安全な subdir にコピーしたときに設定（Remotion の public バンドル対策）
+  assetDir: z.string().optional(),
+  // image path は通常 characters/<assetDir または name>/default.png
   activeImages: z.array(z.string()).optional(),
 });
 
