@@ -56,9 +56,10 @@ async function synthesize(
   text: string,
   speakerId: number,
   audioDir: string,
-  projectName: string
+  projectName: string,
+  speedScale: number
 ): Promise<{ audioPath: string; durationSec: number }> {
-  const hash = shortHash(text);
+  const hash = shortHash(`${text}\0speedScale=${speedScale}`);
   const filename = `${hash}.wav`;
   const audioPath = path.join(audioDir, filename);
 
@@ -91,7 +92,8 @@ async function synthesize(
       `  レスポンス: ${body}`
     );
   }
-  const audioQuery = await queryRes.json();
+  const audioQuery = (await queryRes.json()) as Record<string, unknown>;
+  audioQuery.speedScale = speedScale;
 
   let synthRes: Response;
   try {
@@ -487,9 +489,14 @@ async function main() {
             voicevoxText,
             speakerId,
             audioDir,
-            projectName
+            projectName,
+            config.speedScale
           );
-          const durationInFrames = Math.ceil(durationSec * config.fps);
+          const audioFrames = Math.ceil(durationSec * config.fps);
+          const minSpeechFrames = Math.ceil(
+            (config.minSpeechDurationMs / 1000) * config.fps
+          );
+          const durationInFrames = Math.max(audioFrames, minSpeechFrames);
           segments.push({
             type: "speech",
             text: displayText,

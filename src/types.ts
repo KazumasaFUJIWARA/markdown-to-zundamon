@@ -32,6 +32,10 @@ export const ManifestConfigSchema = z.object({
   slideTransitionMs: z.number().default(600),
   speechGapMs: z.number().default(200),
   paragraphGapMs: z.number().default(400),
+  /** 1セリフあたりの字幕・音声の最短時間（ms）。TTS が短いときに表示が駆け足になりすぎるのを防ぐ */
+  minSpeechDurationMs: z.number().min(0).default(0),
+  /** VOICEVOX AudioQuery の speedScale（既定 1。大きいほど早口） */
+  speedScale: z.number().min(0.5).max(2).default(1),
   fontFamily: z.string().default("M PLUS Rounded 1c"),
   subtitleFontFamily: z.string().optional(),
   slideFontFamily: z.string().optional(),
